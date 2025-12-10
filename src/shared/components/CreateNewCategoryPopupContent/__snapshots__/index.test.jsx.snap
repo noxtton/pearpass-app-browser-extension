@@ -1,0 +1,20 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`CreateNewCategoryPopupContent renders correctly and matches snapshot 1`] = `
+<DocumentFragment>
+  <div
+    class="font-inter absolute flex w-[200px] flex-col items-start overflow-hidden"
+  >
+    <div
+      class="text-white-mode1 bg-grey400-mode1 border-grey100-mode1 relative flex w-full cursor-pointer items-center gap-[7px] border border-b-0 px-2.5 py-1 rounded-t-xl false"
+    >
+      Item 1
+    </div>
+    <div
+      class="text-white-mode1 bg-grey400-mode1 border-grey100-mode1 relative flex w-full cursor-pointer items-center gap-[7px] border border-b-0 px-2.5 py-1 false rounded-b-xl !border-b"
+    >
+      Item 2
+    </div>
+  </div>
+</DocumentFragment>
+`;

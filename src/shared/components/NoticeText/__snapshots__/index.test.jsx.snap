@@ -1,0 +1,69 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`NoticeText renders correctly with default type 1`] = `
+<div>
+  <div
+    class="flex items-center gap-1.5"
+  >
+    <div>
+      OkayIcon
+    </div>
+    <div
+      class="font-inter text-[10px] font-medium text-primary400-mode1"
+    >
+      Default message
+    </div>
+  </div>
+</div>
+`;
+
+exports[`NoticeText renders correctly with type "error" 1`] = `
+<div>
+  <div
+    class="flex items-center gap-1.5"
+  >
+    <div>
+      ErrorIcon
+    </div>
+    <div
+      class="font-inter text-[10px] font-medium text-errorred-mode1"
+    >
+      Error message
+    </div>
+  </div>
+</div>
+`;
+
+exports[`NoticeText renders correctly with type "success" 1`] = `
+<div>
+  <div
+    class="flex items-center gap-1.5"
+  >
+    <div>
+      OkayIcon
+    </div>
+    <div
+      class="font-inter text-[10px] font-medium text-primary400-mode1"
+    >
+      Success message
+    </div>
+  </div>
+</div>
+`;
+
+exports[`NoticeText renders correctly with type "warning" 1`] = `
+<div>
+  <div
+    class="flex items-center gap-1.5"
+  >
+    <div>
+      YellowErrorIcon
+    </div>
+    <div
+      class="font-inter text-[10px] font-medium text-erroryellow-mode1"
+    >
+      Warning message
+    </div>
+  </div>
+</div>
+`;

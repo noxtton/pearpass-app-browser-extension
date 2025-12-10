@@ -1,0 +1,29 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ButtonSecondary Component renders correctly when disabled 1`] = `
+<button
+  class="border-primary400-mode1 cursor-pointer rounded-[10px] border bg-transparent px-[15px] py-[8px] text-[14px] font-semibold text-white pointer-events-none opacity-50"
+  disabled=""
+  type="button"
+>
+  Disabled Button
+</button>
+`;
+
+exports[`ButtonSecondary Component renders correctly with a custom type 1`] = `
+<button
+  class="border-primary400-mode1 cursor-pointer rounded-[10px] border bg-transparent px-[15px] py-[8px] text-[14px] font-semibold text-white "
+  type="submit"
+>
+  Submit Button
+</button>
+`;
+
+exports[`ButtonSecondary Component renders correctly with default props 1`] = `
+<button
+  class="border-primary400-mode1 cursor-pointer rounded-[10px] border bg-transparent px-[15px] py-[8px] text-[14px] font-semibold text-white "
+  type="button"
+>
+  Default Button
+</button>
+`;

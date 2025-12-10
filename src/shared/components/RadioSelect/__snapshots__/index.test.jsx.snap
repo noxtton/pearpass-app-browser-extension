@@ -1,0 +1,51 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`RadioSelect Component renders correctly and matches snapshot 1`] = `
+<div>
+  <div
+    class="flex flex-col"
+  >
+    <div
+      class="text-white-mode1 mb-2 text-xs font-medium"
+    >
+      Test Title
+    </div>
+    <div
+      class="text-white-mode1 flex cursor-pointer items-center gap-2 text-sm font-semibold mt-2"
+    >
+      <button
+        class="inline-flex h-[15px] w-[15px] flex-shrink-0 items-center justify-center rounded-full border-2 p-[2px] transition-opacity border-primary400-mode1"
+      >
+        <span
+          class="bg-primary400-mode1 h-full w-full rounded-full transition-opacity duration-300 opacity-100"
+        />
+      </button>
+      Option 1
+    </div>
+    <div
+      class="text-white-mode1 flex cursor-pointer items-center gap-2 text-sm font-semibold mt-1"
+    >
+      <button
+        class="inline-flex h-[15px] w-[15px] flex-shrink-0 items-center justify-center rounded-full border-2 p-[2px] transition-opacity border-primary300-mode1"
+      >
+        <span
+          class="bg-primary400-mode1 h-full w-full rounded-full transition-opacity duration-300 opacity-0"
+        />
+      </button>
+      Option 2
+    </div>
+    <div
+      class="text-white-mode1 flex cursor-pointer items-center gap-2 text-sm font-semibold mt-1"
+    >
+      <button
+        class="inline-flex h-[15px] w-[15px] flex-shrink-0 items-center justify-center rounded-full border-2 p-[2px] transition-opacity border-primary300-mode1"
+      >
+        <span
+          class="bg-primary400-mode1 h-full w-full rounded-full transition-opacity duration-300 opacity-0"
+        />
+      </button>
+      Option 3
+    </div>
+  </div>
+</div>
+`;

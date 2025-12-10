@@ -1,0 +1,33 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ModalHeader renders correctly and matches snapshot 1`] = `
+<div>
+  <div
+    class="flex flex-none items-center gap-[10px]"
+  >
+    <div
+      class="flex-1"
+    >
+      <div>
+        Test Content
+      </div>
+    </div>
+    <button
+      class="bg-black-mode1 border-black-mode1 hover:border-primary400-mode1 flex cursor-pointer items-center justify-center rounded-full border p-1"
+      type="button"
+    >
+      <svg
+        fill="#BADE5B"
+        height="24px"
+        width="24px"
+      >
+        <circle
+          cx="10"
+          cy="10"
+          r="5"
+        />
+      </svg>
+    </button>
+  </div>
+</div>
+`;

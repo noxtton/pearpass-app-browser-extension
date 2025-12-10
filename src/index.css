@@ -1,0 +1,78 @@
+@import 'tailwindcss';
+@import './color-vars.css';
+
+@font-face {
+  font-family: 'Humble Nostalgia';
+  src: url('/assets/fonts/humbleNostalgia/HumbleNostalgia.otf')
+    format('OpenType');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url('/assets/fonts/inter/Inter-VariableFont_opsz,wght.ttf')
+    format('truetype');
+}
+
+@theme {
+  --font-humble: 'Humble Nostalgia';
+  --font-inter: 'Inter';
+}
+
+@layer base {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-size: unset;
+    font-weight: unset;
+  }
+}
+
+
+* {
+  box-sizing: border-box;
+}
+
+*::-webkit-scrollbar {
+  display: none;
+  
+}
+
+.custom-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 16px;
+  width: 16px;
+  border-radius: 50%;
+  background-color: #BADE5B; /* Replace with actual color (e.g., colors.primary400.mode1) */
+  border: none;
+  cursor: pointer;
+
+  &:hover {
+      box-shadow: 0 0 0 4px #BADE5B66
+    }
+  
+     &:active::-webkit-slider-thumb {
+    box-shadow: 0 0 0 4px #BADE5B66;
+  }
+
+  &:focus::-webkit-slider-thumb {
+    box-shadow: 0 0 0 4px #BADE5B66;
+  }
+}
+
+.custom-slider::-moz-range-thumb {
+  height: 16px;
+  width: 16px;
+  border-radius: 50%;
+  background-color: #007aff;
+  border: none;
+  cursor: pointer;
+}

@@ -1,0 +1,169 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`RecordItem renders correctly when isSelected is true 1`] = `
+<DocumentFragment>
+  <div
+    class="flex items-center gap-[10px]"
+  >
+    <div
+      data-testid="record-avatar"
+    />
+    <div
+      class="text-white-mode1 font-inter flex flex-col justify-start text-[16px] font-normal"
+    >
+      <span>
+        Test Item
+      </span>
+      <p
+        class="text-grey100-mode1 text-[12px]"
+      >
+        Test Folder
+      </p>
+    </div>
+  </div>
+</DocumentFragment>
+`;
+
+exports[`RecordItem renders correctly with different record types 1`] = `
+<DocumentFragment>
+  <div
+    class="flex items-center gap-[10px]"
+  >
+    <div
+      data-testid="record-avatar"
+    />
+    <div
+      class="text-white-mode1 font-inter flex flex-col justify-start text-[16px] font-normal"
+    >
+      <span>
+        Test Item
+      </span>
+      <p
+        class="text-grey100-mode1 text-[12px]"
+      >
+        Test Folder
+      </p>
+    </div>
+  </div>
+</DocumentFragment>
+`;
+
+exports[`RecordItem renders correctly with different record types 2`] = `
+<DocumentFragment>
+  <div
+    class="flex items-center gap-[10px]"
+  >
+    <div
+      data-testid="record-avatar"
+    />
+    <div
+      class="text-white-mode1 font-inter flex flex-col justify-start text-[16px] font-normal"
+    >
+      <span>
+        Test Item
+      </span>
+      <p
+        class="text-grey100-mode1 text-[12px]"
+      >
+        Test Folder
+      </p>
+    </div>
+  </div>
+</DocumentFragment>
+`;
+
+exports[`RecordItem renders correctly with different record types 3`] = `
+<DocumentFragment>
+  <div
+    class="flex items-center gap-[10px]"
+  >
+    <div
+      data-testid="record-avatar"
+    />
+    <div
+      class="text-white-mode1 font-inter flex flex-col justify-start text-[16px] font-normal"
+    >
+      <span>
+        Test Item
+      </span>
+      <p
+        class="text-grey100-mode1 text-[12px]"
+      >
+        Test Folder
+      </p>
+    </div>
+  </div>
+</DocumentFragment>
+`;
+
+exports[`RecordItem renders correctly with different record types 4`] = `
+<DocumentFragment>
+  <div
+    class="flex items-center gap-[10px]"
+  >
+    <div
+      data-testid="record-avatar"
+    />
+    <div
+      class="text-white-mode1 font-inter flex flex-col justify-start text-[16px] font-normal"
+    >
+      <span>
+        Test Item
+      </span>
+      <p
+        class="text-grey100-mode1 text-[12px]"
+      >
+        Test Folder
+      </p>
+    </div>
+  </div>
+</DocumentFragment>
+`;
+
+exports[`RecordItem renders correctly with different record types 5`] = `
+<DocumentFragment>
+  <div
+    class="flex items-center gap-[10px]"
+  >
+    <div
+      data-testid="record-avatar"
+    />
+    <div
+      class="text-white-mode1 font-inter flex flex-col justify-start text-[16px] font-normal"
+    >
+      <span>
+        Test Item
+      </span>
+      <p
+        class="text-grey100-mode1 text-[12px]"
+      >
+        Test Folder
+      </p>
+    </div>
+  </div>
+</DocumentFragment>
+`;
+
+exports[`RecordItem renders correctly with given props 1`] = `
+<DocumentFragment>
+  <div
+    class="flex items-center gap-[10px]"
+  >
+    <div
+      data-testid="record-avatar"
+    />
+    <div
+      class="text-white-mode1 font-inter flex flex-col justify-start text-[16px] font-normal"
+    >
+      <span>
+        Test Item
+      </span>
+      <p
+        class="text-grey100-mode1 text-[12px]"
+      >
+        Test Folder
+      </p>
+    </div>
+  </div>
+</DocumentFragment>
+`;

@@ -1,0 +1,10 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`LoadingOverlay renders correctly 1`] = `
+<div>
+  <div
+    class="fixed top-0 left-0 z-[4000] h-full w-full cursor-wait "
+    data-testid="loading-overlay"
+  />
+</div>
+`;

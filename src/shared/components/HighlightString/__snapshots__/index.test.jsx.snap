@@ -1,0 +1,69 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`HighlightString renders empty text 1`] = `
+<div>
+  <span
+    class="text-white-mode1 whitespace-pre-wrap"
+  >
+    <span />
+  </span>
+</div>
+`;
+
+exports[`HighlightString renders text with numbers highlighted 1`] = `
+<div>
+  <span
+    class="text-white-mode1 whitespace-pre-wrap"
+  >
+    <span>
+      Hello 
+    </span>
+    <span
+      class="text-primary400-mode1 font-bold"
+    >
+      123
+    </span>
+    <span>
+       World
+    </span>
+  </span>
+</div>
+`;
+
+exports[`HighlightString renders text with special characters highlighted 1`] = `
+<div>
+  <span
+    class="text-white-mode1 whitespace-pre-wrap"
+  >
+    <span>
+      Hello 
+    </span>
+    <span
+      class="text-categorylogin-mode1 font-bold"
+    >
+      @
+    </span>
+    <span>
+      World
+    </span>
+    <span
+      class="text-categorylogin-mode1 font-bold"
+    >
+      !
+    </span>
+    <span />
+  </span>
+</div>
+`;
+
+exports[`HighlightString renders text without numbers or special characters 1`] = `
+<div>
+  <span
+    class="text-white-mode1 whitespace-pre-wrap"
+  >
+    <span>
+      Hello World
+    </span>
+  </span>
+</div>
+`;

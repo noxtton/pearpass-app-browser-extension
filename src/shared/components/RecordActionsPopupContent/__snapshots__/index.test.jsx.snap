@@ -1,0 +1,59 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`RecordActionsPopupContent renders correctly with compact variant 1`] = `
+<div>
+  <div
+    class="border-grey100-mode1 bg-grey400-mode1 font-inter absolute flex min-w-[150px] flex-col items-start overflow-hidden rounded-[10px] border p-[5px] text-[10px] gap-[4px]"
+  >
+    <div
+      class="text-white-mode1 flex w-full cursor-pointer items-center gap-[5px] py-1 break-keep whitespace-nowrap border-grey100-mode1 border-b "
+    >
+      <svg
+        data-testid="icon-edit"
+      />
+      <p>
+        Edit
+      </p>
+    </div>
+    <div
+      class="text-white-mode1 flex w-full cursor-pointer items-center gap-[5px] py-1 break-keep whitespace-nowrap  "
+    >
+      <svg
+        data-testid="icon-delete"
+      />
+      <p>
+        Delete
+      </p>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`RecordActionsPopupContent renders correctly with default variant 1`] = `
+<div>
+  <div
+    class="border-grey100-mode1 bg-grey400-mode1 font-inter absolute flex min-w-[150px] flex-col items-start overflow-hidden rounded-[10px] border p-[4px_8px] text-[14px] gap-[4px]"
+  >
+    <div
+      class="text-white-mode1 flex w-full cursor-pointer items-center gap-[5px] py-1 break-keep whitespace-nowrap border-grey100-mode1 border-b "
+    >
+      <svg
+        data-testid="icon-edit"
+      />
+      <p>
+        Edit
+      </p>
+    </div>
+    <div
+      class="text-white-mode1 flex w-full cursor-pointer items-center gap-[5px] py-1 break-keep whitespace-nowrap  "
+    >
+      <svg
+        data-testid="icon-delete"
+      />
+      <p>
+        Delete
+      </p>
+    </div>
+  </div>
+</div>
+`;

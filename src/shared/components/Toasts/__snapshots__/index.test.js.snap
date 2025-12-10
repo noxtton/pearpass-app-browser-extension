@@ -1,0 +1,25 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Toasts Component renders correctly with toasts 1`] = `
+<div>
+  <div
+    class="fixed bottom-[12px] left-1/2 z-[1500] flex -translate-x-1/2 transform flex-col gap-[10px]"
+  >
+    <div
+      class="font-inter flex items-center justify-center gap-1.5 rounded-lg bg-white p-2.5 text-sm leading-normal font-normal text-black shadow-lg"
+    >
+      <div
+        data-testid="mock-icon"
+      >
+        Icon
+      </div>
+      Success message
+    </div>
+    <div
+      class="font-inter flex items-center justify-center gap-1.5 rounded-lg bg-white p-2.5 text-sm leading-normal font-normal text-black shadow-lg"
+    >
+      Error message
+    </div>
+  </div>
+</div>
+`;

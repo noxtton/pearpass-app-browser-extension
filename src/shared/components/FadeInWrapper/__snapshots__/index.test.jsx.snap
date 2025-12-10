@@ -1,0 +1,13 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`FadeInWrapper matches snapshot 1`] = `
+<DocumentFragment>
+  <div
+    class="flex h-full w-full transition-opacity duration-350 opacity-100"
+  >
+    <span>
+      Snapshot Test
+    </span>
+  </div>
+</DocumentFragment>
+`;

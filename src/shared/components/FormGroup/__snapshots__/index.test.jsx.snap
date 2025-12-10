@@ -1,0 +1,36 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`FormGroup Component renders correctly with title and children 1`] = `
+<div>
+  <div
+    class="group flex w-full flex-col gap-2.5"
+  >
+    <div
+      class="text-grey100-mode1 inline-flex cursor-pointer items-center gap-1.5 self-start text-xs font-normal"
+    >
+      <svg
+        fill="none"
+        height="24"
+        viewBox="0 0 25 25"
+        width="24"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M3.17234 16.3761L12.4801 7.06836L21.7878 16.3761L20.7243 17.4396L12.4801 9.19536L4.23584 17.4396L3.17234 16.3761Z"
+          fill="#F6F6F6"
+        />
+      </svg>
+      Test Title
+    </div>
+    <div
+      class="w-full"
+    >
+      <div>
+        Child Content
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`FormGroup Component renders null when no children are provided 1`] = `<div />`;

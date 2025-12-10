@@ -1,0 +1,27 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`InputField Component renders correctly with default props 1`] = `
+<div>
+  <div
+    class="relative flex flex-col w-full items-start gap-2.5 border-grey100-mode1 not-first:mt-2.5 not-first:border-t not-first:pt-2.5   "
+  >
+    <div
+      class="flex w-full items-start gap-2.5"
+    >
+      <div
+        class="flex flex-1 flex-col"
+      >
+        <div
+          class="relative mt-1 flex items-center overflow-x-auto whitespace-nowrap"
+        >
+          <input
+            class="font-inter w-full text-base font-bold text-white-mode1 placeholder:text-grey100-mode1 focus:outline-none "
+            type="text"
+            value=""
+          />
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;

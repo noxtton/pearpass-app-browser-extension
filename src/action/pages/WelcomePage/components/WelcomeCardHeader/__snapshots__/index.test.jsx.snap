@@ -1,0 +1,44 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`WelcomeCardHeader renders correctly with title and back button 1`] = `
+<DocumentFragment>
+  <div
+    class="flex w-full flex-col items-center gap-[5px]"
+  >
+    <div
+      class="flex w-full items-center gap-[28px]"
+    >
+      <button
+        data-testid="back-button"
+      >
+        Mock Button
+      </button>
+      <span
+        class="text-white-mode1 font-inter flex-1 pr-[58px] text-center text-[20px] font-medium"
+      >
+        Test Title
+        <br />
+      </span>
+    </div>
+  </div>
+</DocumentFragment>
+`;
+
+exports[`WelcomeCardHeader renders correctly without back button 1`] = `
+<DocumentFragment>
+  <div
+    class="flex w-full flex-col items-center gap-[5px]"
+  >
+    <div
+      class="flex w-full items-center gap-[28px]"
+    >
+      <span
+        class="text-white-mode1 font-inter flex-1 pr-[58px] text-center text-[20px] font-medium"
+      >
+        Test Title
+        <br />
+      </span>
+    </div>
+  </div>
+</DocumentFragment>
+`;

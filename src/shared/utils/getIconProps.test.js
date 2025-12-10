@@ -1,0 +1,91 @@
+import { colors } from 'pearpass-lib-ui-theme-provider'
+
+import { getIconProps } from './getIconProps'
+
+jest.mock('pearpass-lib-ui-theme-provider', () => ({
+  colors: {
+    white: {
+      mode1: '#FFFFFF'
+    }
+  }
+}))
+
+describe('getIconProps', () => {
+  it('should return default values when no props are provided', () => {
+    const result = getIconProps({})
+
+    expect(result).toEqual({
+      size: '24',
+      height: '24',
+      width: '24',
+      color: colors.white.mode1,
+      fill: false
+    })
+  })
+
+  it('should use custom size for all dimensions when only size is provided', () => {
+    const result = getIconProps({ size: '24' })
+
+    expect(result).toEqual({
+      size: '24',
+      height: '24',
+      width: '24',
+      color: colors.white.mode1,
+      fill: false
+    })
+  })
+
+  it('should use custom height when provided', () => {
+    const result = getIconProps({ height: '32' })
+
+    expect(result).toEqual({
+      size: '24',
+      height: '32',
+      width: '24',
+      color: colors.white.mode1,
+      fill: false
+    })
+  })
+
+  it('should use custom width when provided', () => {
+    const result = getIconProps({ width: '32' })
+
+    expect(result).toEqual({
+      size: '24',
+      height: '24',
+      width: '32',
+      color: colors.white.mode1,
+      fill: false
+    })
+  })
+
+  it('should use custom color when provided', () => {
+    const result = getIconProps({ color: '#000000' })
+
+    expect(result).toEqual({
+      size: '24',
+      height: '24',
+      width: '24',
+      color: '#000000',
+      fill: false
+    })
+  })
+
+  it('should handle all custom props together', () => {
+    const result = getIconProps({
+      size: '24',
+      height: '32',
+      width: '48',
+      color: '#FF0000',
+      fill: false
+    })
+
+    expect(result).toEqual({
+      size: '24',
+      height: '32',
+      width: '48',
+      color: '#FF0000',
+      fill: false
+    })
+  })
+})

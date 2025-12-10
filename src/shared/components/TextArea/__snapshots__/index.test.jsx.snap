@@ -1,0 +1,25 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`TextArea Component renders correctly with default props 1`] = `
+<textarea
+  class=" 
+    w-full resize-none rounded-[10px] border border-grey100-mode1 
+    bg-grey400-mode1 font-inter outline-none
+    pointer-events-auto
+    focus:border-primary400-mode1
+   text-white-mode1 placeholder-grey100-mode1 h-[233px] px-[10px] py-[8px] text-[16px] font-bold "
+  placeholder="Enter text"
+/>
+`;
+
+exports[`TextArea Component renders correctly with report variant 1`] = `
+<textarea
+  class=" 
+    w-full resize-none rounded-[10px] border border-grey100-mode1 
+    bg-grey400-mode1 font-inter outline-none
+    pointer-events-auto
+    focus:border-primary400-mode1
+   text-white-mode1 placeholder-grey300-mode1 h-[70px] px-[12px] py-[11px] text-[12px] font-semibold "
+  placeholder="Enter text"
+/>
+`;

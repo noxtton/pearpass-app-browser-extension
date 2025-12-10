@@ -1,0 +1,161 @@
+// Mock dependencies before importing the module under test
+jest.mock('./nativeMessagingProtocol', () => ({
+  isWrappedMessage: jest.fn(),
+  unwrapMessage: jest.fn(),
+  wrapMessage: jest.fn()
+}))
+jest.mock('../shared/constants/nativeMessaging', () => ({
+  NATIVE_MESSAGE_TYPES: {
+    REQUEST: 'REQUEST',
+    CONNECT: 'CONNECT',
+    DISCONNECT: 'DISCONNECT',
+    EVENT: 'EVENT'
+  },
+  NATIVE_MESSAGING_CONFIG: {
+    DEBUG_MODE: true,
+    LOG_PREFIX: '[NATIVE] ',
+    HOST_NAME: 'test-host'
+  },
+  NATIVE_MESSAGING_ERRORS: {
+    REQUEST_TIMEOUT: 'Timeout',
+    DISCONNECTED: 'Disconnected',
+    FAILED_TO_CONNECT: 'Failed to connect',
+    ALREADY_CONNECTED: 'Already connected',
+    FAILED_TO_UNWRAP: 'Failed to unwrap message'
+  },
+  REQUEST_TIMEOUT: {
+    DEFAULT_MS: 1000,
+    AVAILABILITY_CHECK_MS: 500
+  },
+  SPECIAL_COMMANDS: {
+    CHECK_AVAILABILITY: 'CHECK_AVAILABILITY'
+  }
+}))
+jest.mock('../shared/utils/logger', () => ({
+  logger: {
+    log: jest.fn(),
+    error: jest.fn()
+  }
+}))
+
+// Provide a fake global chrome.runtime for testing
+global.chrome = {
+  runtime: {
+    connectNative: jest.fn(),
+    lastError: null,
+    sendMessage: jest.fn(() => Promise.resolve()),
+    onMessage: { addListener: jest.fn() },
+    onDisconnect: { addListener: jest.fn() }
+  }
+}
+
+describe('NativeMessaging & integration', () => {
+  let nativeModule
+  beforeEach(() => {
+    // Reset modules to apply fresh mocks
+    jest.resetModules()
+    // Clear chrome mocks
+    global.chrome.runtime.connectNative.mockReset()
+    global.chrome.runtime.sendMessage.mockClear()
+    global.chrome.runtime.lastError = null
+    // Import after mocks
+    nativeModule = require('./nativeMessaging')
+  })
+
+  test('connect() should call chrome.runtime.connectNative and resolve when not already connected', async () => {
+    const fakePort = {
+      onMessage: { addListener: jest.fn() },
+      onDisconnect: { addListener: jest.fn() }
+    }
+    global.chrome.runtime.connectNative.mockReturnValue(fakePort)
+
+    await expect(
+      nativeModule.nativeMessaging.connect()
+    ).resolves.toBeUndefined()
+    expect(global.chrome.runtime.connectNative).toHaveBeenCalledWith(
+      'test-host'
+    )
+    expect(fakePort.onMessage.addListener).toHaveBeenCalled()
+    expect(fakePort.onDisconnect.addListener).toHaveBeenCalled()
+  })
+
+  test('connect() when already connected should resolve immediately without reconnecting', async () => {
+    const fakePort = {
+      onMessage: { addListener: jest.fn() },
+      onDisconnect: { addListener: jest.fn() }
+    }
+    global.chrome.runtime.connectNative.mockReturnValue(fakePort)
+
+    // First connect
+    await nativeModule.nativeMessaging.connect()
+    // Clear the mock and call again
+    global.chrome.runtime.connectNative.mockClear()
+
+    await expect(
+      nativeModule.nativeMessaging.connect()
+    ).resolves.toBeUndefined()
+    expect(global.chrome.runtime.connectNative).not.toHaveBeenCalled()
+  })
+
+  test('sendRequest() should wrap and post message and resolve on response', async () => {
+    // Arrange
+    const { nativeMessaging } = nativeModule
+    const {
+      wrapMessage,
+      isWrappedMessage,
+      unwrapMessage
+    } = require('./nativeMessagingProtocol')
+    wrapMessage.mockImplementation((req) => ({ wrapped: req }))
+
+    // Simulate connected state
+    const fakePort = {
+      postMessage: jest.fn(),
+      onMessage: { addListener: jest.fn() },
+      onDisconnect: { addListener: jest.fn() }
+    }
+    global.chrome.runtime.connectNative.mockReturnValue(fakePort)
+    await nativeMessaging.connect()
+
+    // Spy on internal handler
+    // Extract the registered listener
+    const messageListener = fakePort.onMessage.addListener.mock.calls[0][0]
+    // Act: send a request
+    const promise = nativeMessaging.sendRequest('TEST_CMD', { foo: 'bar' })
+    // Wrap internals: simulate incoming message
+    const responseMsg = { id: 1, result: { success: true }, success: true }
+    const wrappedResponse = { wrapped: responseMsg }
+    // isWrappedMessage -> true, unwrapMessage returns actual
+    isWrappedMessage.mockReturnValue(true)
+    unwrapMessage.mockReturnValue(responseMsg)
+
+    // Simulate message event
+    messageListener(wrappedResponse)
+
+    // Assert
+    await expect(promise).resolves.toEqual({ success: true })
+    expect(fakePort.postMessage).toHaveBeenCalledWith({
+      wrapped: { id: 1, command: 'TEST_CMD', params: { foo: 'bar' } }
+    })
+  })
+
+  test('sendRequest() should reject on timeout', async () => {
+    jest.useFakeTimers()
+    const { nativeMessaging } = nativeModule
+
+    // Simulate connected state
+    const fakePort = {
+      postMessage: jest.fn(),
+      onMessage: { addListener: jest.fn() },
+      onDisconnect: { addListener: jest.fn() }
+    }
+    global.chrome.runtime.connectNative.mockReturnValue(fakePort)
+    await nativeMessaging.connect()
+
+    const promise = nativeMessaging.sendRequest('OTHER_CMD')
+    // Advance time past default timeout (1000ms)
+    jest.advanceTimersByTime(1500)
+
+    await expect(promise).rejects.toThrow('Timeout: OTHER_CMD')
+    jest.useRealTimers()
+  })
+})

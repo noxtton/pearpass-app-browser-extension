@@ -1,0 +1,478 @@
+// Secure channel client for Native Messaging pairing and session scaffolding
+// Uses nativeMessaging to call desktop IPC methods.
+// Uses @noble/curves for Ed25519/X25519 and @noble/ciphers for XSalsa20-Poly1305
+
+import { xsalsa20poly1305 } from '@noble/ciphers/salsa'
+import { ed25519, x25519 } from '@noble/curves/ed25519'
+
+import { nativeMessaging } from './nativeMessaging'
+import {
+  BACKGROUND_MESSAGE_TYPES,
+  SESSION_ERROR_PATTERNS,
+  SECURITY_ERROR_PATTERNS
+} from '../shared/constants/nativeMessaging'
+import { logger } from '../shared/utils/logger'
+
+// Helper functions to replace Buffer usage in service worker
+const base64Encode = (uint8Array) => {
+  // Convert Uint8Array to base64 without using Buffer
+  const binary = String.fromCharCode.apply(null, uint8Array)
+  return btoa(binary)
+}
+
+const base64Decode = (base64String) => {
+  // Convert base64 to Uint8Array without using Buffer
+  const binary = atob(base64String)
+  const bytes = new Uint8Array(binary.length)
+  for (let i = 0; i < binary.length; i++) {
+    bytes[i] = binary.charCodeAt(i)
+  }
+  return bytes
+}
+
+const concatUint8Arrays = (arrays) => {
+  // Concatenate multiple Uint8Arrays without using Buffer.concat
+  const totalLength = arrays.reduce((acc, arr) => acc + arr.length, 0)
+  const result = new Uint8Array(totalLength)
+  let offset = 0
+  for (const arr of arrays) {
+    result.set(arr, offset)
+    offset += arr.length
+  }
+  return result
+}
+
+// Crypto helper functions
+
+const generateX25519KeyPair = () => {
+  const privateKey = x25519.utils.randomPrivateKey()
+  const publicKey = x25519.getPublicKey(privateKey)
+  return { privateKey, publicKey }
+}
+
+const generateNonce = () => {
+  const nonce = new Uint8Array(24)
+  crypto.getRandomValues(nonce)
+  return nonce
+}
+
+const verifyEd25519Signature = (message, signature, publicKey) => {
+  try {
+    return ed25519.verify(signature, message, publicKey)
+  } catch (e) {
+    logger.error('Ed25519 verification failed:', e)
+    return false
+  }
+}
+
+const secretbox = (plaintext, nonce, key) =>
+  xsalsa20poly1305(key, nonce).encrypt(plaintext)
+
+const secretboxOpen = (ciphertext, nonce, key) => {
+  try {
+    return xsalsa20poly1305(key, nonce).decrypt(ciphertext)
+  } catch (error) {
+    logger.log('Decryption failed:', error?.message || error)
+    return null
+  }
+}
+
+const STORAGE_KEYS = Object.freeze({
+  paired: 'nm.paired',
+  fingerprint: 'nm.fingerprint',
+  ed25519PublicKey: 'nm.ed25519PublicKey',
+  x25519PublicKey: 'nm.x25519PublicKey'
+})
+
+/**
+ * read from chrome.storage.local
+ * @param {string[]} keys
+ * @returns {Promise<Record<string, any>>}
+ */
+const storageGet = (keys) =>
+  new Promise((resolve) =>
+    chrome.storage.local.get(keys, (res) => resolve(res))
+  )
+
+/**
+ * write to chrome.storage.local
+ * @param {Record<string, any>} obj
+ * @returns {Promise<void>}
+ */
+const storageSet = (obj) =>
+  new Promise((resolve) => chrome.storage.local.set(obj, () => resolve()))
+
+/**
+ * Minimal secure channel client.
+ */
+export class SecureChannelClient {
+  /**
+   * Check if an identity is pinned.
+   * @returns {Promise<boolean>}
+   */
+  async isPaired() {
+    const pinned = await this.getPinnedIdentity()
+    return !!pinned
+  }
+
+  /**
+   * Check if a secure session is active.
+   * @returns {boolean}
+   */
+  hasActiveSession() {
+    return !!this._session?.id
+  }
+
+  /**
+   * Ensure a secure session is established when paired.
+   * Starts a handshake if needed.
+   * @returns {Promise<void>}
+   */
+  async ensureSession() {
+    // If a session is already active, keep using it (no expiration policy)
+    if (this.hasActiveSession()) return
+    if (!(await this.isPaired())) return
+
+    const handshake = await this.beginHandshake()
+    if (!handshake.ok) {
+      // If identity keys are unavailable on desktop, trigger pairing flow
+      if (
+        handshake.error === SECURITY_ERROR_PATTERNS.IDENTITY_KEYS_UNAVAILABLE
+      ) {
+        await this.clearSession(
+          SECURITY_ERROR_PATTERNS.IDENTITY_KEYS_UNAVAILABLE
+        )
+        throw new Error(
+          `${SECURITY_ERROR_PATTERNS.IDENTITY_KEYS_UNAVAILABLE}: Desktop requires pairing reset`
+        )
+      }
+      throw new Error(
+        handshake.error || SESSION_ERROR_PATTERNS.HANDSHAKE_FAILED
+      )
+    }
+    const finish = await this.finishHandshake()
+    if (!finish?.ok) {
+      // Clear session to trigger pairing modal on handshake failure
+      await this.clearSession(
+        finish?.error || SESSION_ERROR_PATTERNS.HANDSHAKE_FINISH_FAILED
+      )
+      throw new Error(
+        finish?.error || SESSION_ERROR_PATTERNS.HANDSHAKE_FINISH_FAILED
+      )
+    }
+  }
+
+  /**
+   * Fetch desktop app identity public keys and fingerprint.
+   * Requires a pairing token that must be manually copied from the desktop app.
+   * @param {string} pairingToken - The pairing token displayed in the desktop app
+   * @returns {Promise<{ed25519PublicKey: string, x25519PublicKey: string, fingerprint: string}>}
+   */
+  async getAppIdentity(pairingToken) {
+    if (!pairingToken) {
+      throw new Error(
+        'PairingTokenRequired: Please enter the pairing token from the desktop app'
+      )
+    }
+    return nativeMessaging.sendRequest('nmGetAppIdentity', { pairingToken })
+  }
+
+  /**
+   * Fetch short pairing code (for user confirmation).
+   * @deprecated This method is deprecated for security reasons.
+   * @returns {Promise<{pairingCode: string}>}
+   */
+  async getPairingCode() {
+    throw new Error(
+      'MethodDeprecated: For security, pairing codes must be viewed directly in the desktop app'
+    )
+  }
+
+  /**
+   * Returns pinned identity if present.
+   * @returns {Promise<{fingerprint: string, ed25519PublicKey: string, x25519PublicKey: string} | null>}
+   */
+  async getPinnedIdentity() {
+    const res = await storageGet([
+      STORAGE_KEYS.fingerprint,
+      STORAGE_KEYS.ed25519PublicKey,
+      STORAGE_KEYS.x25519PublicKey,
+      STORAGE_KEYS.paired
+    ])
+    const fingerprint = res[STORAGE_KEYS.fingerprint]
+    const ed25519PublicKey = res[STORAGE_KEYS.ed25519PublicKey]
+    const x25519PublicKey = res[STORAGE_KEYS.x25519PublicKey]
+    if (!fingerprint) return null
+    return { fingerprint, ed25519PublicKey, x25519PublicKey }
+  }
+
+  /**
+   * Store pinned identity after user verification (pairing).
+   * @param {{fingerprint: string, ed25519PublicKey: string, x25519PublicKey: string}} id
+   * @returns {Promise<void>}
+   */
+  async pinIdentity(id) {
+    await storageSet({
+      [STORAGE_KEYS.fingerprint]: id.fingerprint,
+      [STORAGE_KEYS.ed25519PublicKey]: id.ed25519PublicKey,
+      [STORAGE_KEYS.x25519PublicKey]: id.x25519PublicKey,
+      [STORAGE_KEYS.paired]: true
+    })
+  }
+
+  /**
+   * Remove pinned identity.
+   * @returns {Promise<void>}
+   */
+  async unpair() {
+    await storageSet({
+      [STORAGE_KEYS.fingerprint]: undefined,
+      [STORAGE_KEYS.ed25519PublicKey]: undefined,
+      [STORAGE_KEYS.x25519PublicKey]: undefined,
+      [STORAGE_KEYS.paired]: false
+    })
+  }
+
+  /**
+   * Clear session and pairing data on security failures.
+   * @param {string} reason - The reason for clearing ('SignatureInvalid', 'IdentityKeysUnavailable')
+   * @returns {Promise<void>}
+   */
+  async clearSession(reason = 'SignatureInvalid') {
+    // Clear in-memory session
+    this._session = undefined
+    this._ephemeralKeyPair = undefined
+
+    // Clear stored pairing data
+    await this.unpair()
+
+    // Notify extension about pairing requirement
+    chrome.runtime
+      .sendMessage({
+        type: BACKGROUND_MESSAGE_TYPES.PAIRING_REQUIRED,
+        reason: reason
+      })
+      .catch(() => {
+        // Ignore errors if no listener
+      })
+  }
+
+  /**
+   * Begin authenticated key exchange with the desktop.
+   * @returns {Promise<{ok: boolean, error?: string, sessionId?: string}>}
+   */
+  async beginHandshake() {
+    try {
+      // Generate ephemeral keypair (X25519-compatible)
+      const extensionEphemeralKeyPair = generateX25519KeyPair()
+      const extensionEphemeralPublicKeyB64 = base64Encode(
+        extensionEphemeralKeyPair.publicKey
+      )
+
+      // Hold ephemeral in instance for finish
+      this._ephemeralKeyPair = extensionEphemeralKeyPair
+
+      // Request host handshake
+      const handshakeResponse = await nativeMessaging.sendRequest(
+        'nmBeginHandshake',
+        {
+          extEphemeralPubB64: extensionEphemeralPublicKeyB64
+        }
+      )
+
+      // Load pinned identity to verify signature
+      const pinnedIdentity = await this.getPinnedIdentity()
+      if (!pinnedIdentity) {
+        // Trigger pairing modal when not paired
+        await this.clearSession(SESSION_ERROR_PATTERNS.NOT_PAIRED)
+        return { ok: false, error: SESSION_ERROR_PATTERNS.NOT_PAIRED }
+      }
+
+      const hostEphemeralPublicKeyBytes = base64Decode(
+        handshakeResponse.hostEphemeralPubB64
+      )
+
+      // Verify signature over transcript = host_eph_pk || ext_eph_pk
+      const transcript = concatUint8Arrays([
+        hostEphemeralPublicKeyBytes,
+        extensionEphemeralKeyPair.publicKey
+      ])
+
+      const desktopEd25519PublicKey = base64Decode(
+        pinnedIdentity.ed25519PublicKey
+      )
+      const handshakeSignature = base64Decode(handshakeResponse.signatureB64)
+
+      // Verify Ed25519 signature
+      const signatureValid = verifyEd25519Signature(
+        transcript,
+        handshakeSignature,
+        desktopEd25519PublicKey
+      )
+      if (!signatureValid) {
+        // Clear pairing data on signature failure
+        await this.clearSession(SECURITY_ERROR_PATTERNS.SIGNATURE_INVALID)
+        return { ok: false, error: SECURITY_ERROR_PATTERNS.SIGNATURE_INVALID }
+      }
+
+      // Derive shared secret using X25519
+      const sharedSecret = x25519.getSharedSecret(
+        extensionEphemeralKeyPair.privateKey,
+        hostEphemeralPublicKeyBytes
+      )
+
+      // Derive session key via SHA-256(shared||transcript)
+      const preimage = concatUint8Arrays([sharedSecret, transcript])
+      const digest = await crypto.subtle.digest('SHA-256', preimage)
+      const sessionSymmetricKey = new Uint8Array(digest).slice(0, 32) // Use first 32 bytes for AES-256
+
+      // Stash session info in-memory (no expiration policy)
+      this._session = {
+        id: handshakeResponse.sessionId,
+        key: sessionSymmetricKey,
+        seq: 0
+      }
+
+      return { ok: true, sessionId: handshakeResponse.sessionId }
+    } catch (error) {
+      // If the desktop throws IdentityKeysUnavailable, pass it through
+      if (
+        error?.message?.includes(
+          SECURITY_ERROR_PATTERNS.IDENTITY_KEYS_UNAVAILABLE
+        )
+      ) {
+        return {
+          ok: false,
+          error: SECURITY_ERROR_PATTERNS.IDENTITY_KEYS_UNAVAILABLE
+        }
+      }
+      // Other errors
+      return {
+        ok: false,
+        error: error?.message || SESSION_ERROR_PATTERNS.HANDSHAKE_FAILED
+      }
+    }
+  }
+
+  /**
+   * Finish AKE.
+   * @returns {Promise<{ok: boolean, error?: string, sessionId?: string}>}
+   */
+  async finishHandshake() {
+    try {
+      if (!this._session?.id) throw new Error(SESSION_ERROR_PATTERNS.NO_SESSION)
+      const res = await nativeMessaging.sendRequest('nmFinishHandshake', {
+        sessionId: this._session.id
+      })
+      return res
+    } catch (e) {
+      return {
+        ok: false,
+        error: e?.message || SESSION_ERROR_PATTERNS.HANDSHAKE_FAILED
+      }
+    } finally {
+      // Clear ephemeral keys from memory
+      if (this._ephemeralKeyPair) {
+        try {
+          if (this._ephemeralKeyPair.privateKey)
+            this._ephemeralKeyPair.privateKey.fill(0)
+          if (this._ephemeralKeyPair.publicKey)
+            this._ephemeralKeyPair.publicKey.fill(0)
+        } catch (error) {
+          logger.log('Failed to zero ephemeral keys:', error?.message || error)
+        }
+        this._ephemeralKeyPair = undefined
+      }
+    }
+  }
+
+  /**
+   * Secure request using an established session.
+   * @param {{ method: string, params: any }} payload
+   * @returns {Promise<any>}
+   */
+  async secureRequest({ method, params }) {
+    if (!this._session) throw new Error(SESSION_ERROR_PATTERNS.NO_SESSION)
+
+    const attempt = async () => {
+      // Prepare plaintext JSON
+      const seq = ++this._session.seq
+      const plaintextString = JSON.stringify({ method, params })
+      const plaintext = new TextEncoder().encode(plaintextString)
+      const nonce = generateNonce() // 24-byte nonce for XSalsa20
+      const ciphertext = secretbox(plaintext, nonce, this._session.key)
+
+      const res = await nativeMessaging.sendRequest('nmSecureRequest', {
+        sessionId: this._session.id,
+        nonceB64: base64Encode(nonce),
+        ciphertextB64: base64Encode(ciphertext),
+        seq
+      })
+
+      // Decrypt response
+      const responseNonce = base64Decode(res.nonceB64)
+      const responseCiphertext = base64Decode(res.ciphertextB64)
+      const responsePlaintext = secretboxOpen(
+        responseCiphertext,
+        responseNonce,
+        this._session.key
+      )
+      if (!responsePlaintext)
+        throw new Error(SESSION_ERROR_PATTERNS.DECRYPT_FAILED)
+      const decoded = JSON.parse(new TextDecoder().decode(responsePlaintext))
+      if (!decoded.ok)
+        throw new Error(
+          decoded.error || SESSION_ERROR_PATTERNS.SECURE_REQUEST_FAILED
+        )
+      return decoded.result
+    }
+
+    try {
+      return await attempt()
+    } catch (e) {
+      // On decrypt failure or session-related errors, re-handshake once and retry
+      if (
+        e?.message === SESSION_ERROR_PATTERNS.DECRYPT_FAILED ||
+        e?.message === SESSION_ERROR_PATTERNS.SECURE_REQUEST_FAILED ||
+        e?.message === SESSION_ERROR_PATTERNS.NO_SESSION ||
+        e?.message === SESSION_ERROR_PATTERNS.SESSION_NOT_FOUND ||
+        e?.message?.includes(SESSION_ERROR_PATTERNS.SESSION_NOT_FOUND)
+      ) {
+        // Clear any stale session and re-establish
+        this._session = undefined
+        try {
+          await this.ensureSession()
+          return await attempt()
+        } catch (retryError) {
+          // If re-establishment fails, trigger pairing modal
+          await this.clearSession(e?.message)
+          throw retryError
+        }
+      }
+      throw e
+    }
+  }
+
+  /**
+   * Close active session.
+   * @param {string} sessionId
+   * @returns {Promise<{ok: boolean}>}
+   */
+  async closeSession(sessionId) {
+    try {
+      return await nativeMessaging.sendRequest('nmCloseSession', { sessionId })
+    } finally {
+      // Zeroize session key and clear session
+      if (this._session?.key?.fill) {
+        try {
+          this._session.key.fill(0)
+        } catch (error) {
+          logger.log('Failed to zero session key:', error?.message || error)
+        }
+      }
+      this._session = undefined
+    }
+  }
+}
+
+export const secureChannel = new SecureChannelClient()

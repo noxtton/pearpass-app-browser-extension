@@ -1,0 +1,46 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`SwitchWithLabel Component renders correctly with default props 1`] = `
+<div>
+  <div
+    class="flex w-full cursor-pointer items-center justify-between"
+  >
+    <div
+      class="flex-col"
+    >
+      <div
+        class="font-inter text-sm font-normal text-white-mode1"
+      />
+    </div>
+    <div
+      data-testid="mock-switch"
+    >
+      Off
+    </div>
+  </div>
+</div>
+`;
+
+exports[`SwitchWithLabel Component renders the Switch component with the correct isOn prop 1`] = `
+<div
+  data-testid="mock-switch"
+>
+  On
+</div>
+`;
+
+exports[`SwitchWithLabel Component renders with a label and bold text 1`] = `
+<div
+  class="font-inter text-sm font-semibold text-white-mode1"
+>
+  Test Label
+</div>
+`;
+
+exports[`SwitchWithLabel Component renders with a label and normal text 1`] = `
+<div
+  class="font-inter text-sm font-normal text-white-mode1"
+>
+  Test Label
+</div>
+`;

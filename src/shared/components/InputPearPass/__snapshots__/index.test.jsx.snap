@@ -1,0 +1,103 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`InputPearPass Component renders correctly when disabled 1`] = `
+<div>
+  <div
+    class="relative flex w-full items-center gap-2 rounded-lg border p-[10px] border-grey300-mode1 "
+  >
+    <div
+      class="flex flex-1 flex-col"
+    >
+      <div
+        class="relative flex w-full items-center overflow-x-auto whitespace-nowrap"
+      >
+        <input
+          class="font-inter placeholder:text-grey100-mode1 text-white-mode1 w-full bg-transparent text-base font-normal pointer-events-none focus:outline-none"
+          disabled=""
+          placeholder="Enter text"
+          type="text"
+          value=""
+        />
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`InputPearPass Component renders correctly with an error 1`] = `
+<div>
+  <div
+    class="relative flex w-full items-center gap-2 rounded-lg border p-[10px] border-errorred-mode1 "
+  >
+    <div
+      class="flex flex-1 flex-col"
+    >
+      <div
+        class="relative flex w-full items-center overflow-x-auto whitespace-nowrap"
+      >
+        <input
+          class="font-inter placeholder:text-grey100-mode1 text-white-mode1 w-full bg-transparent text-base font-normal  focus:outline-none"
+          placeholder="Enter text"
+          type="text"
+          value=""
+        />
+      </div>
+      <div
+        class="text-errorred-mode1 text-sm"
+      >
+        <div
+          class="flex items-center gap-1.5"
+        >
+          <svg
+            fill="none"
+            height="10"
+            viewBox="0 0 20 20"
+            width="10"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M10 19C14.9706 19 19 14.9706 19 10C19 5.02944 14.9706 1 10 1C5.02944 1 1 5.02944 1 10C1 14.9706 5.02944 19 10 19Z"
+              fill="#D65C5E"
+              stroke="#D13B3D"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+            <path
+              d="M11.2984 4.64795L11.0613 11.97H8.94356L8.70653 4.64795H11.2984ZM9.99986 15.3502C9.6323 15.3502 9.31627 15.2196 9.05176 14.9585C8.79069 14.6975 8.66016 14.3814 8.66016 14.0104C8.66016 13.6463 8.79069 13.3354 9.05176 13.0778C9.31627 12.8167 9.6323 12.6862 9.99986 12.6862C10.3537 12.6862 10.6646 12.8167 10.9325 13.0778C11.2039 13.3354 11.3396 13.6463 11.3396 14.0104C11.3396 14.2578 11.276 14.4828 11.1489 14.6855C11.0253 14.8881 10.8621 15.0496 10.6594 15.1698C10.4602 15.29 10.2403 15.3502 9.99986 15.3502Z"
+              fill="#F6F6F6"
+            />
+          </svg>
+          <div
+            class="font-inter text-[10px] font-medium text-errorred-mode1"
+          >
+            This is an error
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`InputPearPass Component renders correctly with default props 1`] = `
+<div>
+  <div
+    class="relative flex w-full items-center gap-2 rounded-lg border p-[10px] border-grey300-mode1 "
+  >
+    <div
+      class="flex flex-1 flex-col"
+    >
+      <div
+        class="relative flex w-full items-center overflow-x-auto whitespace-nowrap"
+      >
+        <input
+          class="font-inter placeholder:text-grey100-mode1 text-white-mode1 w-full bg-transparent text-base font-normal  focus:outline-none"
+          placeholder="Enter text"
+          type="text"
+          value=""
+        />
+      </div>
+    </div>
+  </div>
+</div>
+`;

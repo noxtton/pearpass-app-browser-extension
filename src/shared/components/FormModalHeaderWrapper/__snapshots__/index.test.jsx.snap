@@ -1,0 +1,56 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`FormModalHeaderWrapper renders correctly with children and buttons 1`] = `
+<div>
+  <div
+    class="flex flex-none items-center justify-between"
+  >
+    <div
+      class="flex"
+    >
+      <div>
+        Child Content
+      </div>
+    </div>
+    <div
+      class="flex items-center gap-[10px]"
+    >
+      <button>
+        Click Me
+      </button>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`FormModalHeaderWrapper renders correctly with children only 1`] = `
+<div>
+  <div
+    class="flex flex-none items-center justify-between"
+  >
+    <div
+      class="flex"
+    >
+      <div>
+        Child Content
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`FormModalHeaderWrapper renders correctly with no buttons 1`] = `
+<div>
+  <div
+    class="flex flex-none items-center justify-between"
+  >
+    <div
+      class="flex"
+    >
+      <span>
+        Only Children
+      </span>
+    </div>
+  </div>
+</div>
+`;
