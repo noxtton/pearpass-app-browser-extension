@@ -578,6 +578,7 @@ function getIframeData(type) {
 }
 
 function sendDataToIframe({ iframeType, iframeData }) {
+
   iframeData?.iframe?.contentWindow?.postMessage(
     {
       type: iframeType,

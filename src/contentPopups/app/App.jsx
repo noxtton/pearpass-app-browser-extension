@@ -8,11 +8,8 @@ import { logger } from '../../shared/utils/logger'
 import { PearpassVaultClient } from '../../vaultClient'
 import { closeIframe } from '../iframeApi/closeIframe'
 
-// const isProduction =
-//   (typeof Pear !== 'undefined' && !!Pear.config?.key) ||
-//   (typeof process !== 'undefined' &&
-//     process.env &&
-//     process.env.NODE_ENV === 'production')
+
+import { isMessageOriginValid } from '../utils/messageValidation'
 
 export const App = () => {
   const { navigate } = useRouter()
@@ -27,6 +24,10 @@ export const App = () => {
     function onMessage(e) {
       const msg = e.data
       logger.log('Message received:', msg?.type, e)
+
+      if (!isMessageOriginValid(msg, e.origin)) {
+        return
+      }
 
       const combinedData = {
         ...msg.data,

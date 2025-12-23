@@ -21,6 +21,7 @@ export const PairingRequiredModalContent = ({ onPairSuccess }) => {
   const [loading, setLoading] = useState(false)
 
   const fetchIdentity = async () => {
+
     if (!pairingToken || pairingToken.trim().length < 10) {
       setToast({
         message: t`Please enter a valid pairing token from the desktop app`
