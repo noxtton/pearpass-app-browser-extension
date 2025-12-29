@@ -13,6 +13,7 @@ import { useLanguageOptions } from '../../../hooks/useLanguageOptions'
 import { ButtonRoundIcon } from '../../../shared/components/ButtonRoundIcon'
 import { ButtonSecondary } from '../../../shared/components/ButtonSecondary'
 import { CardSingleSetting } from '../../../shared/components/CardSingleSetting'
+import { InputField } from '../../../shared/components/InputField'
 import { Select } from '../../../shared/components/Select'
 import { SwitchWithLabel } from '../../../shared/components/SwitchWithLabel'
 import { TextArea } from '../../../shared/components/TextArea'
@@ -38,7 +39,7 @@ export const Settings = () => {
   const { setToast } = useToast()
   const { i18n } = useLingui()
   const { languageOptions } = useLanguageOptions()
-
+  const [email, setEmail] = useState('')
   const [message, setMessage] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [language, setLanguage] = useState(i18n.locale)
@@ -170,6 +171,9 @@ export const Settings = () => {
         </CardSingleSetting>
 
         <CardSingleSetting title={t`Report a problem`}>
+          <div className="text-white-mode1 font-inter mb-[15px] text-[12px]">
+            {t`Tell us what’s going wrong and leave your email so we can follow up with you.`}
+          </div>
           <form
             className="flex flex-col gap-[15px]"
             onSubmit={(e) => {
@@ -183,7 +187,11 @@ export const Settings = () => {
               variant="report"
               placeholder={t`Write your issue...`}
             />
-
+            <InputField
+              value={email}
+              onChange={(val) => setEmail(val)}
+              placeholder={t`Write your email...`}
+            />
             <div className="self-start">
               <ButtonSecondary type="submit">{t`Send`}</ButtonSecondary>
             </div>
