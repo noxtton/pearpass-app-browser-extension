@@ -15,7 +15,7 @@ import { NoticeText } from '../NoticeText'
  *  readonly?: boolean,
  *  onClick?: (value: string) => void,
  *  type?: 'text' | 'password' | 'url',
- *  variant?: 'default' | 'outline'
+ *  variant?: 'default' | 'outline' | 'report'
  *  overlay?: React.ReactNode
  *  autoFocus?: boolean
  *  className?: string
@@ -57,6 +57,7 @@ export const InputField = ({
   }
 
   const isOutline = variant === 'outline'
+  const isReport = variant === 'report'
 
   return (
     <div
@@ -64,7 +65,9 @@ export const InputField = ({
       className={`relative flex w-full flex-col items-start gap-2.5 ${
         isOutline
           ? `hover:border-primary400-mode1 hover:[&+*]:border-t-primary400-mode1 border-grey100-mode1 bg-grey400-mode1 border border-b-0 px-2.5 py-2 first:rounded-t-lg last:rounded-b-lg last:border-b-1`
-          : `border-grey100-mode1 not-first:mt-2.5 not-first:border-t not-first:pt-2.5`
+          : isReport
+            ? ''
+            : `border-grey100-mode1 not-first:mt-2.5 not-first:border-t not-first:pt-2.5`
       } ${readonly ? 'cursor-copy' : ''} ${className} `}
     >
       <div className="flex w-full items-start gap-2.5">
@@ -81,7 +84,9 @@ export const InputField = ({
             </span>
           )}
 
-          <div className="relative mt-1 flex items-center overflow-x-auto whitespace-nowrap">
+          <div
+            className={`relative flex items-center overflow-x-auto whitespace-nowrap ${isReport ? '' : 'mt-1'}`}
+          >
             <input
               ref={inputRef}
               type={type}
@@ -92,7 +97,11 @@ export const InputField = ({
               placeholder={placeholder}
               readOnly={readonly}
               autoFocus={autoFocus}
-              className={`font-inter w-full text-base font-bold ${overlay && !isFocused ? 'caret-primary400-mode1 text-transparent' : 'text-white-mode1'} placeholder:text-grey100-mode1 focus:outline-none ${readonly ? 'cursor-copy' : ''}`}
+              className={`font-inter w-full ${
+                isReport
+                  ? 'border-grey100-mode1 placeholder:text-grey300-mode1 focus:border-primary400-mode1 text-white-mode1 cursor-pointer rounded-[10px] border px-[11px] py-3 text-xs leading-normal placeholder:font-normal focus:outline-none'
+                  : `text-base font-bold ${overlay && !isFocused ? 'caret-primary400-mode1 text-transparent' : 'text-white-mode1'} placeholder:text-grey100-mode1 focus:outline-none ${readonly ? 'cursor-copy' : ''}`
+              }`}
             />
 
             {!isFocused && overlay && (

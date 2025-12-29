@@ -6,6 +6,7 @@ import {
   sendGoogleFormFeedback,
   sendSlackFeedback
 } from 'pear-apps-lib-feedback'
+import { Validator } from 'pear-apps-utils-validator'
 import { PRIVACY_POLICY, TERMS_OF_USE } from 'pearpass-lib-constants'
 
 import { version } from '../../../../public/manifest.json'
@@ -40,6 +41,7 @@ export const Settings = () => {
   const { i18n } = useLingui()
   const { languageOptions } = useLanguageOptions()
   const [email, setEmail] = useState('')
+  const [emailError, setEmailError] = useState('')
   const [message, setMessage] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [language, setLanguage] = useState(i18n.locale)
@@ -59,8 +61,31 @@ export const Settings = () => {
     i18n.activate(selected.value)
   }
 
+  const emailValidator = Validator.string().email(t`Invalid email format`)
+
+  const validateEmail = (emailValue) => {
+    if (!emailValue) {
+      setEmailError('')
+      return true
+    }
+    const error = emailValidator.validate(emailValue)
+    setEmailError(error || '')
+    return !error
+  }
+
+  const handleEmailChange = (val) => {
+    setEmail(val)
+    if (emailError || val) {
+      validateEmail(val)
+    }
+  }
+
   const handleReportProblem = async () => {
     if (!message?.length || isLoading) {
+      return
+    }
+
+    if (email && !validateEmail(email)) {
       return
     }
 
@@ -171,8 +196,8 @@ export const Settings = () => {
         </CardSingleSetting>
 
         <CardSingleSetting title={t`Report a problem`}>
-          <div className="text-white-mode1 font-inter mb-[15px] text-[12px]">
-            {t`Tell us what’s going wrong and leave your email so we can follow up with you.`}
+          <div className="font-inter mb-[15px] text-[12px] text-white">
+            {t`Tell us what's going wrong and leave your email so we can follow up with you.`}
           </div>
           <form
             className="flex flex-col gap-[15px]"
@@ -189,8 +214,10 @@ export const Settings = () => {
             />
             <InputField
               value={email}
-              onChange={(val) => setEmail(val)}
+              onChange={handleEmailChange}
+              variant="report"
               placeholder={t`Write your email...`}
+              error={emailError}
             />
             <div className="self-start">
               <ButtonSecondary type="submit">{t`Send`}</ButtonSecondary>
