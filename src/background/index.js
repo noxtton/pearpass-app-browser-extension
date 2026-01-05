@@ -2,7 +2,12 @@ import './nativeMessaging' // Initialize native messaging handler
 import { MESSAGES, ALARMS } from './constants'
 import { secureChannel } from './secureChannel'
 import * as CredentialGenerator from './utils/credentialGenerator'
+import { validateSender } from './utils/validateSender'
 import { ERROR_CODES } from '../shared/constants/nativeMessaging'
+import {
+  MESSAGE_TYPES,
+  SECURE_MESSAGE_TYPES
+} from '../shared/services/messageBridge'
 import { arrayBufferToBase64Url } from '../shared/utils/arrayBufferToBase64Url'
 import { base64UrlToArrayBuffer } from '../shared/utils/base64UrlToArrayBuffer'
 import { logger } from '../shared/utils/logger'
@@ -69,17 +74,44 @@ chrome.alarms.onAlarm.addListener(async (alarm) => {
 })
 
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
-  if (msg.type === 'login') {
+  const sensitiveTypes = [
+    ...Object.values(SECURE_MESSAGE_TYPES),
+    MESSAGE_TYPES.READY_FOR_PASSKEY_PAYLOAD,
+    MESSAGE_TYPES.GET_ASSERTION_CREDENTIAL
+  ]
+
+  if (sensitiveTypes.includes(msg.type)) {
+    if (!validateSender(sender, 'extension-page')) {
+      sendResponse({ success: false, error: 'Unauthorized' })
+      return
+    }
+  }
+
+  const contentScriptTypes = [
+    MESSAGE_TYPES.LOGIN,
+    MESSAGE_TYPES.GET_PENDING_LOGIN,
+    MESSAGE_TYPES.CREATE_PASSKEY,
+    MESSAGE_TYPES.GET_PASSKEY
+  ]
+
+  if (contentScriptTypes.includes(msg.type)) {
+    if (!validateSender(sender, 'content-script')) {
+      sendResponse({ success: false, error: 'Unauthorized' })
+      return
+    }
+  }
+
+  if (msg.type === MESSAGE_TYPES.LOGIN) {
     handleLoginMessage({ msg, sender })
     return
   }
 
-  if (msg.type === 'getPendingLogin') {
+  if (msg.type === MESSAGE_TYPES.GET_PENDING_LOGIN) {
     handleGetPendingLogin({ msg, sender, sendResponse })
     return
   }
 
-  if (msg.type === 'createPasskey') {
+  if (msg.type === MESSAGE_TYPES.CREATE_PASSKEY) {
     const queryParams = new URLSearchParams({
       requestId: msg.requestId,
       tabId: sender.tab.id,
@@ -92,7 +124,7 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     return true
   }
 
-  if (msg.type === 'getPasskey') {
+  if (msg.type === MESSAGE_TYPES.GET_PASSKEY) {
     const queryParams = new URLSearchParams({
       requestId: msg.requestId,
       tabId: sender.tab.id,
@@ -105,19 +137,19 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     return true
   }
 
-  if (msg.type === 'selectedPasskey') {
+  if (msg.type === MESSAGE_TYPES.SELECTED_PASSKEY) {
     handlePasskeyCreated({ msg })
     return
   }
 
-  if (msg.type === 'readyForPasskeyPayload') {
+  if (msg.type === MESSAGE_TYPES.READY_FOR_PASSKEY_PAYLOAD) {
     const { requestOrigin, serializedPublicKey } = msg
     void sendPasskeyPayload(requestOrigin, serializedPublicKey, sendResponse)
 
     return true
   }
 
-  if (msg.type === 'getAssertionCredential') {
+  if (msg.type === MESSAGE_TYPES.GET_ASSERTION_CREDENTIAL) {
     const {
       requestOrigin,
       serializedPublicKey,
@@ -137,7 +169,7 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     return true
   }
 
-  if (msg.type === 'SECURE_CHANNEL_GET_IDENTITY') {
+  if (msg.type === MESSAGE_TYPES.GET_IDENTITY) {
     ;(async () => {
       try {
         const { pairingToken } = msg
@@ -162,7 +194,7 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     return true
   }
 
-  if (msg.type === 'SECURE_CHANNEL_CONFIRM_PAIR') {
+  if (msg.type === MESSAGE_TYPES.CONFIRM_PAIR) {
     ;(async () => {
       try {
         await secureChannel.pinIdentity(msg.identity)
@@ -196,7 +228,7 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     return true
   }
 
-  if (msg.type === 'SECURE_CHANNEL_CHECK_PAIRED') {
+  if (msg.type === MESSAGE_TYPES.CHECK_PAIRED) {
     ;(async () => {
       try {
         const paired = await secureChannel.isPaired()
@@ -212,7 +244,7 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     return true
   }
 
-  if (msg.type === 'GET_PLATFORM_INFO') {
+  if (msg.type === MESSAGE_TYPES.GET_PLATFORM_INFO) {
     chrome.runtime.getPlatformInfo((info) => {
       sendResponse(info)
     })
