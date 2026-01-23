@@ -9,7 +9,8 @@ import {
 import {
   AUTO_LOCK_TIMEOUT_OPTIONS,
   PRIVACY_POLICY,
-  TERMS_OF_USE
+  TERMS_OF_USE,
+  AUTO_LOCK_ENABLED
 } from 'pearpass-lib-constants'
 
 import { version } from '../../../../public/manifest.json'
@@ -18,6 +19,7 @@ import { useLanguageOptions } from '../../../hooks/useLanguageOptions'
 import { ButtonRoundIcon } from '../../../shared/components/ButtonRoundIcon'
 import { ButtonSecondary } from '../../../shared/components/ButtonSecondary'
 import { CardSingleSetting } from '../../../shared/components/CardSingleSetting'
+import { RadioOption } from '../../../shared/components/RadioOption'
 import { Select } from '../../../shared/components/Select'
 import { SwitchWithLabel } from '../../../shared/components/SwitchWithLabel'
 import { TextArea } from '../../../shared/components/TextArea'
@@ -26,7 +28,10 @@ import {
   GOOGLE_FORM_MAPPING,
   SLACK_WEBHOOK_URL_PATH
 } from '../../../shared/constants/feedback'
-import { LOCAL_STORAGE_KEYS } from '../../../shared/constants/storage'
+import {
+  LOCAL_STORAGE_KEYS,
+  PASSKEY_VERIFICATION_OPTIONS
+} from '../../../shared/constants/storage'
 import { useRouter } from '../../../shared/context/RouterContext'
 import { useToast } from '../../../shared/context/ToastContext'
 import { useCopyToClipboard } from '../../../shared/hooks/useCopyToClipboard'
@@ -37,6 +42,7 @@ import {
 } from '../../../shared/utils/autofillSetting'
 import { isPasswordChangeReminderDisabled } from '../../../shared/utils/isPasswordChangeReminderDisabled'
 import { logger } from '../../../shared/utils/logger'
+import { getPasskeyVerificationPreference } from '../../../shared/utils/passkeyVerificationPreference'
 
 export const TIMEOUT_OPTIONS = Object.values(AUTO_LOCK_TIMEOUT_OPTIONS)
 
@@ -57,6 +63,9 @@ export const Settings = () => {
   const [language, setLanguage] = useState(i18n.locale)
   const [isPasswordReminderDisabled, setIsPasswordReminderDisabled] = useState(
     isPasswordChangeReminderDisabled()
+  )
+  const [passkeyVerification, setPasskeyVerification] = useState(
+    getPasskeyVerificationPreference()
   )
 
   const { isAutoLockEnabled, timeoutMs, setAutoLockEnabled, setTimeoutMs } =
@@ -142,6 +151,14 @@ export const Settings = () => {
     setIsAutoFillEnabled(isEnabled)
   }
 
+  const handlePasskeyVerificationChange = (value) => {
+    localStorage.setItem(
+      LOCAL_STORAGE_KEYS.PASSKEY_VERIFICATION_PREFERENCE,
+      value
+    )
+    setPasskeyVerification(value)
+  }
+
   const selectedTimeoutOption =
     translatedOptions.find((option) => option.value === timeoutMs) ||
     translatedOptions[0]
@@ -187,22 +204,63 @@ export const Settings = () => {
               description={t`When clicking a password you copy that into your clipboard`}
               onChange={handleCopyToClipboardSettingChange}
             />
-
-            <div className="flex flex-col gap-0.5">
-              <SwitchWithLabel
-                isOn={isAutoLockEnabled}
-                label={t`Auto Log-out`}
-                description={t`Automatically logs you out after you stop interacting with the app, based on the timeout you select.`}
-                onChange={setAutoLockEnabled}
-              />
-              {isAutoLockEnabled && (
-                <Select
-                  items={translatedOptions}
-                  selectedItem={selectedTimeoutOption}
-                  onItemSelect={(option) => setTimeoutMs(option.value)}
-                  placeholder={t`Select`}
+            {AUTO_LOCK_ENABLED && (
+              <div className="flex flex-col gap-0.5">
+                <SwitchWithLabel
+                  isOn={isAutoLockEnabled}
+                  label={t`Auto Log-out`}
+                  description={t`Automatically logs you out after you stop interacting with the app, based on the timeout you select.`}
+                  onChange={setAutoLockEnabled}
                 />
-              )}
+                {isAutoLockEnabled && (
+                  <Select
+                    items={translatedOptions}
+                    selectedItem={selectedTimeoutOption}
+                    onItemSelect={(option) => setTimeoutMs(option.value)}
+                    placeholder={t`Select`}
+                  />
+                )}
+              </div>
+            )}
+          </div>
+        </CardSingleSetting>
+
+        <CardSingleSetting title={t`Passkey verification`}>
+          <div className="flex flex-col gap-[15px]">
+            <p className="font-inter text-[14px] leading-normal font-bold text-white">
+              {t`Choose when to verify your identity when using passkeys.`}
+            </p>
+            <div className="flex flex-col gap-[10px]">
+              <RadioOption
+                name="passkeyVerification"
+                value={PASSKEY_VERIFICATION_OPTIONS.REQUESTED}
+                label={t`Requested by website (default)`}
+                description={t`Only ask for verification when the website requires it.`}
+                isSelected={
+                  passkeyVerification === PASSKEY_VERIFICATION_OPTIONS.REQUESTED
+                }
+                onChange={handlePasskeyVerificationChange}
+              />
+              <RadioOption
+                name="passkeyVerification"
+                value={PASSKEY_VERIFICATION_OPTIONS.ALWAYS}
+                label={t`Always`}
+                description={t`Always require identity verification when using passkeys.`}
+                isSelected={
+                  passkeyVerification === PASSKEY_VERIFICATION_OPTIONS.ALWAYS
+                }
+                onChange={handlePasskeyVerificationChange}
+              />
+              <RadioOption
+                name="passkeyVerification"
+                value={PASSKEY_VERIFICATION_OPTIONS.NEVER}
+                label={t`Never`}
+                description={t`Skip identity verification, even if the website requests it.`}
+                isSelected={
+                  passkeyVerification === PASSKEY_VERIFICATION_OPTIONS.NEVER
+                }
+                onChange={handlePasskeyVerificationChange}
+              />
             </div>
           </div>
         </CardSingleSetting>
